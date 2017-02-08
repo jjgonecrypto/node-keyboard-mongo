@@ -11,7 +11,7 @@
   ],
   "author": "justin j. moses <justinjmoses@gmail.com>",
   "license": "MIT",
-  "repository": "justinjmoses/node-keyboard-mongo",
+  "repository": "https://github.com/justinjmoses/node-keyboard-mongo",
   "engines": {
     "node": ">=6.0.0"
   },
