@@ -2,13 +2,17 @@
 
 const { MongoClient, Timestamp } = require('mongodb')
 
+const Rx = require('node-keyboard-rx')()
+
 module.exports = {
     oplog(uri, options = { }) {
 
         const { includePast } = options
 
-        //'mongodb://localhost:27000,localhost:27010/?replicaSet=backup_test'
-        MongoClient.connect(uri, (err, db) => {
+        const whenConnected = MongoClient.connect(uri)
+        whenConnected.catch(console.error)
+
+        return Rx.Observable.fromPromise(whenConnected).concatMap(db => {
             console.log('Connected correctly to server')
 
             const findQuery = { ns: /.+/ }
@@ -29,17 +33,7 @@ module.exports = {
 
             const stream = oplog.stream()
 
-            stream.on('end', function () {
-                console.log('stream ended')
-            })
-
-            stream.on('data', function (data) {
-                console.log(data)
-            })
-
-            stream.on('error', function (err) {
-                console.log(err)
-            })
+            return Rx.Observable.fromEvent(stream, 'data')
         })
     }
 }
