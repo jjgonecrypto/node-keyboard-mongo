@@ -1,0 +1,24 @@
+{
+  "name": "node-keyboard-mongo",
+  "version": "1.0.0",
+  "description": "MongoDB support for node-keyboard",
+  "main": "index.js",
+  "scripts": {
+    "test": "eslint ."
+  },
+  "keywords": [
+    "node-keyboard-mongo"
+  ],
+  "author": "justin j. moses <justinjmoses@gmail.com>",
+  "license": "MIT",
+  "repository": "justinjmoses/node-keyboard-mongo",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "dependencies": {
+    "mongodb": "^2.2.22"
+  },
+  "devDependencies": {
+    "eslint": "^3.9.1"
+  }
+}
