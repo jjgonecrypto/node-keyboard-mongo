@@ -4,8 +4,11 @@ const { MongoClient, Timestamp } = require('mongodb')
 
 const Rx = require('node-keyboard-rx')()
 
+const repl = require('repl')
+
 module.exports = {
     oplog(uri, options = { }) {
+        const currentRepl = repl.repl
 
         const { includePast } = options
 
@@ -13,7 +16,8 @@ module.exports = {
         whenConnected.catch(console.error)
 
         return Rx.Observable.fromPromise(whenConnected).concatMap(db => {
-            console.log('Connected correctly to server')
+            // SIGINT will close the db connection
+            currentRepl.once('SIGINT', () => db.close())
 
             const findQuery = { ns: /.+/ }
             if (!includePast) {
