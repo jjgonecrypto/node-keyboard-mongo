@@ -21,6 +21,13 @@ Then start node keyboard via `node keyboard` and import this plugin via `const m
 #Usage
 
 ```javascript
+// connect to a MongoDB replicaSet via a connection string[1]
 const oplogStream = mongo.oplog('mongodb://localhost:27000,localhost:27010/?replicaSet=myReplicaSet')
-oplogStream.subscribe(play)
+
+oplogStream
+    .do(mongo.log) // log out received data
+    .map(mongo.compose) // transform data into music
+    .subscribe(play) // play music
 ```
+
+> 1. [MongoDB Docs: Connection string](https://docs.mongodb.com/manual/reference/connection-string/)

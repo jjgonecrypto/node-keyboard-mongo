@@ -5,6 +5,11 @@ const { MongoClient, Timestamp } = require('mongodb')
 const Rx = require('node-keyboard-rx')()
 
 const repl = require('repl')
+const util = require('util')
+
+const chalk = require('chalk')
+
+const { instrument } = repl.repl.context
 
 module.exports = {
     oplog(uri, options = { }) {
@@ -39,5 +44,33 @@ module.exports = {
 
             return Rx.Observable.fromEvent(stream, 'data')
         })
+    },
+
+    compose({ op, o }) {
+        const ins = {
+            'i': 'timpani',
+            'd': 'gunshot',
+            'u': 'koto',
+            'c': 'bird_tweet'
+        }
+
+        const len = util.inspect(o).length
+
+        const note = (len % 88 + 21)
+
+        return instrument(ins[op])(note)
+    },
+
+    log({ op, o, ns }) {
+        const map = {
+            'i': chalk.green('insert'),
+            'u': chalk.yellow('update'),
+            'd': chalk.red('delete'),
+            'c': chalk.blue('command')
+        }
+
+        console.log(`${map[op]}: ${chalk.gray(ns)}`) // ${chalk.gray(util.inspect(o))}
+
+        return { op, o, ns }
     }
 }
