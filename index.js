@@ -1,6 +1,6 @@
 'use strict'
 
-const { MongoClient, Timestamp } = require('mongodb')
+const { MongoClient, Timestamp, ObjectID } = require('mongodb')
 
 const Rx = require('node-keyboard-rx')()
 
@@ -48,17 +48,24 @@ module.exports = {
 
     compose({ op, o }) {
         const ins = {
-            'i': 'timpani',
-            'd': 'gunshot',
+            'i': 'piano',
+            'd': 'rock_organ',
             'u': 'koto',
             'c': 'bird_tweet'
         }
 
-        const len = util.inspect(o).length
+        const base = 48 // The key: currently C3
 
-        const note = (len % 88 + 21)
+        const notes = Object.keys(o).map(key => {
+            if (o[key] instanceof ObjectID) return base
+            else if (typeof o[key] === 'string') return base + 7 //P5
+            else if (typeof o[key] === 'number') return base + 4 //M3
+            else if (o[key] instanceof Date) return base + 12 //P8
+            else if (Array.isArray(o[key])) return base + 14 //M9
+            else if (typeof o[key] === 'object') return base + 10 //m7
+        })
 
-        return instrument(ins[op])(note)
+        return notes.map(n => instrument(ins[op])(n))
     },
 
     log({ op, o, ns }) {
@@ -69,8 +76,7 @@ module.exports = {
             'c': chalk.blue('command')
         }
 
-        console.log(`${map[op]}: ${chalk.gray(ns)}`) // ${chalk.gray(util.inspect(o))}
-
+        console.log(`${map[op]}: ${chalk.gray(ns)} ${chalk.gray(util.inspect(o))}`)
         return { op, o, ns }
     }
 }
