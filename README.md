@@ -20,32 +20,11 @@ Then start node keyboard via `node keyboard` and import this plugin via `const m
 
 ## Usage
 
-```javascript
-// connect to a MongoDB replicaSet via a connection string[1]
-const oplogStream = mongo.oplog({ uri: 'mongodb://localhost:27000,localhost:27010/?replicaSet=myReplicaSet' })
+* `oplog.listen({ uri: String, includePast: Boolean = false })`
+* `tailable({ uri: String, db: String, collection: String, findQuery: Object = {}, fields: Object = {} })`
 
-oplogStream
-    .do(mongo.log) // log out received data
-    .flatMap(mongo.compose) // transform data into music
-    .subscribe(play) // play music
-```
-
-See all oplog entries, add the `includePast` flag
-
-```javascript
-// add includePast flag
-mongo.oplog({ uri: ..., includePast: true })
-```
-
-Tail any capped collection:
-
-```javascript
-// tail a mongodb capped collection
-const tail = mongo.tailable({ uri: 'mongodb://...', db: '...', collection: '...', findQuery: { ... } })
-
-tail.subscribe(console.log, console.error)
-```
-
-
+## Examples
+ * [oplog](./examples/01_oplog.js)
+ * [capped collection](./examples/02_capped.js)
 
 > 1. [MongoDB Docs: Connection string](https://docs.mongodb.com/manual/reference/connection-string/)

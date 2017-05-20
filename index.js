@@ -4,14 +4,16 @@ const { MongoClient, Timestamp, ObjectID } = require('mongodb')
 
 const Rx = require('node-keyboard-rx')()
 
+const path = require('path')
 const repl = require('repl')
 const util = require('util')
 
 const chalk = require('chalk')
+const examples = require('node-examples')
 
 const { instrument } = repl.repl.context
 
-module.exports = {
+const mongo = module.exports = {
     tailable({ uri, db, collection, findQuery = {}, fields = {}, includePast }) {
         const currentRepl = repl.repl
 
@@ -44,18 +46,7 @@ module.exports = {
         })
     },
 
-    oplog({ uri, includePast }) {
-        return this.tailable({ uri, db: 'local', collection: 'oplog.rs', includePast })
-    },
-
-    compose({ op, o }) {
-        const ins = {
-            'i': 'piano',
-            'd': 'rock_organ',
-            'u': 'koto',
-            'c': 'bird_tweet'
-        }
-
+    compose(o) {
         const base = 48 // The key: currently C3
 
         const notes = Object.keys(o).map(key => {
@@ -65,20 +56,50 @@ module.exports = {
             else if (o[key] instanceof Date) return base + 12 //P8
             else if (Array.isArray(o[key])) return base + 14 //M9
             else if (typeof o[key] === 'object') return base + 10 //m7
+            else return base
         })
 
-        return notes.map(n => instrument(ins[op])(n))
+        return notes
     },
 
-    log({ op, o, ns }) {
-        const map = {
-            'i': chalk.green('insert'),
-            'u': chalk.yellow('update'),
-            'd': chalk.red('delete'),
-            'c': chalk.blue('command')
-        }
+    log(o) {
+        console.log(chalk.gray(util.inspect(o)))
+    },
 
-        console.log(`${map[op]}: ${chalk.gray(ns)} ${chalk.gray(util.inspect(o))}`)
-        return { op, o, ns }
+    oplog: {
+        listen({ uri, includePast }) {
+            return mongo.tailable({
+                uri,
+                db: 'local',
+                collection: 'oplog.rs',
+                includePast
+            }).filter(({ op }) => ['i', 'd', 'u', 'c'].indexOf(op) > -1) // filter out noops
+        },
+
+        compose({ op, o }) {
+            const ins = {
+                'i': 'piano',
+                'd': 'rock_organ',
+                'u': 'koto',
+                'c': 'bird_tweet'
+            }
+
+            const notes = mongo.compose(o)
+
+            return notes.map(n => instrument(ins[op])(n))
+        },
+
+        log({ op, o, ns }) {
+            const map = {
+                'i': chalk.green('insert'),
+                'u': chalk.yellow('update'),
+                'd': chalk.red('delete'),
+                'c': chalk.blue('command')
+            }
+
+            console.log(`${map[op]}: ${chalk.gray(ns)} ${chalk.gray(util.inspect(o))}`)
+        }
     }
 }
+
+examples({ path: path.join(__dirname, 'examples'), prefix: 'mongo_example_' })
