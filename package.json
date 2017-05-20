@@ -1,6 +1,6 @@
 {
   "name": "node-keyboard-mongo",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "MongoDB support for node-keyboard",
   "main": "index.js",
   "scripts": {
