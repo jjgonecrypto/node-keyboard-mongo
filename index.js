@@ -12,38 +12,40 @@ const chalk = require('chalk')
 const { instrument } = repl.repl.context
 
 module.exports = {
-    oplog(uri, options = { }) {
+    tailable({ uri, db, collection, findQuery = {}, fields = {}, includePast }) {
         const currentRepl = repl.repl
 
-        const { includePast } = options
+        const isOplog = db === 'local' && collection === 'oplog.rs'
 
         const whenConnected = MongoClient.connect(uri)
-        whenConnected.catch(console.error)
 
-        return Rx.Observable.fromPromise(whenConnected).concatMap(db => {
+        return Rx.Observable.fromPromise(whenConnected).concatMap(connection => {
             // SIGINT will close the db connection
-            currentRepl.once('SIGINT', () => db.close())
+            currentRepl.once('SIGINT', () => connection.close())
 
-            const findQuery = { ns: /.+/ }
-            if (!includePast) {
+            if (isOplog && !includePast) {
                 findQuery.ts = { $gt: new Timestamp(1, new Date().getTime()/1000) }  // future only
             }
 
-            let oplog = db
-                .db('local')
-                .collection('oplog.rs')
-                .find(findQuery)
+            let oplog = connection
+                .db(db)
+                .collection(collection)
+                .find(findQuery, fields)
                 .addCursorFlag('tailable', true)
                 .addCursorFlag('awaitData', true)
 
-            if (!includePast) {
+            if (isOplog && !includePast) {
                 oplog = oplog.addCursorFlag('oplogReplay', true)
             }
 
             const stream = oplog.stream()
 
-            return Rx.Observable.fromEvent(stream, 'data')
+            return Rx.Observable.stream(stream)
         })
+    },
+
+    oplog({ uri, includePast }) {
+        return this.tailable({ uri, db: 'local', collection: 'oplog.rs', includePast })
     },
 
     compose({ op, o }) {
