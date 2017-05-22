@@ -21,10 +21,14 @@ Then start node keyboard via `node keyboard` and import this plugin via `const m
 ## Usage
 
 * `oplog.listen({ uri: String, includePast: Boolean = false })`
-* `tailable({ uri: String, db: String, collection: String, findQuery: Object = {}, fields: Object = {} })`
+* `tail({ uri: String, db: String, collection: String, findQuery: Object = {}, fields: Object = {} })`
+* `query({ uri: String, db: String, collection: String, findQuery: Object = {}, fields: Object = {} })`
 
 ## Examples
- * [oplog](./examples/01_oplog.js)
- * [capped collection](./examples/02_capped.js)
 
+* [oplog](./examples/01_oplog.js)
+* [capped collection](./examples/02_capped.js)
+* [query](./examples/03_query.js)
+
+> Ref:
 > 1. [MongoDB Docs: Connection string](https://docs.mongodb.com/manual/reference/connection-string/)

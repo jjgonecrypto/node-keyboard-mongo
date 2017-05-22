@@ -5,13 +5,18 @@ const { play } = repl.context
 const mongo = require('..')
 
 module.exports = () => {
-    const { tail, log, compose } = mongo
+    const { query, log, compose } = mongo
 
-    const cursor = tail({
+    const cursor = query({
         uri: 'mongodb://localhost:26000',
-        db: 'tmp',
+        db: 'test',
         // this must be a capped collection https://docs.mongodb.com/manual/core/capped-collections/
-        collection: 'log'
+        collection: 'log',
+        findQuery: {
+            name: {
+                $exists: 1
+            }
+        }
     })
 
     // tail is Rx Observable of oplog events

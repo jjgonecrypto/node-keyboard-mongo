@@ -14,7 +14,8 @@ const examples = require('node-examples')
 const { instrument } = repl.repl.context
 
 const mongo = module.exports = {
-    tailable({ uri, db, collection, findQuery = {}, fields = {}, includePast }) {
+    query({ uri, db, collection, findQuery = {}, fields = {}, tail = false, includePast = false }) {
+
         const currentRepl = repl.repl
 
         const isOplog = db === 'local' && collection === 'oplog.rs'
@@ -29,20 +30,37 @@ const mongo = module.exports = {
                 findQuery.ts = { $gt: new Timestamp(1, new Date().getTime()/1000) }  // future only
             }
 
-            let oplog = connection
+            let cursor = connection
                 .db(db)
                 .collection(collection)
                 .find(findQuery, fields)
-                .addCursorFlag('tailable', true)
-                .addCursorFlag('awaitData', true)
 
-            if (isOplog && !includePast) {
-                oplog = oplog.addCursorFlag('oplogReplay', true)
+            if (tail) {
+                cursor = cursor
+                    .addCursorFlag('tailable', true)
+                    .addCursorFlag('awaitData', true)
             }
 
-            const stream = oplog.stream()
+            if (isOplog && !includePast) {
+                cursor = cursor
+                    .addCursorFlag('oplogReplay', true)
+            }
+
+            const stream = cursor.stream()
 
             return Rx.Observable.stream(stream)
+        })
+    },
+
+    tail({ uri, db, collection, findQuery = {}, fields = {}, includePast }) {
+        return mongo.query({
+            uri,
+            db,
+            collection,
+            findQuery,
+            fields,
+            includePast,
+            tail: true
         })
     },
 
@@ -68,7 +86,7 @@ const mongo = module.exports = {
 
     oplog: {
         listen({ uri, includePast }) {
-            return mongo.tailable({
+            return mongo.tail({
                 uri,
                 db: 'local',
                 collection: 'oplog.rs',
