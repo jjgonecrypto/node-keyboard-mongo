@@ -26,9 +26,9 @@ Then start node keyboard via `node keyboard` and import this plugin via `const m
 
 ## Examples
 
-* [oplog](./examples/01_oplog.js)
+* [query](./examples/01_query.js)
 * [capped collection](./examples/02_capped.js)
-* [query](./examples/03_query.js)
+* [oplog](./examples/03_oplog.js)
 
 > Ref:
 > 1. [MongoDB Docs: Connection string](https://docs.mongodb.com/manual/reference/connection-string/)

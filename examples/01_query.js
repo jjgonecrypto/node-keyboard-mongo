@@ -2,6 +2,8 @@ const repl = require('repl').repl
 
 const { play } = repl.context
 
+const Rx = require('node-keyboard-rx')()
+
 const mongo = require('..')
 
 module.exports = () => {
@@ -10,8 +12,7 @@ module.exports = () => {
     const cursor = query({
         uri: 'mongodb://localhost:26000',
         db: 'test',
-        // this must be a capped collection https://docs.mongodb.com/manual/core/capped-collections/
-        collection: 'log',
+        collection: 'users',
         findQuery: {
             name: {
                 $exists: 1
@@ -21,6 +22,7 @@ module.exports = () => {
 
     // tail is Rx Observable of oplog events
     cursor
+        .concatMap(x => Rx.Observable.of(x).delay(500))
         .do(log) // log out received data
         .flatMap(compose) // transform data into music
         .subscribe(play, console.error) // play music
