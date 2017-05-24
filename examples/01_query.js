@@ -9,6 +9,13 @@ const mongo = require('..')
 module.exports = () => {
     const { query, log, compose } = mongo
 
+    // to test start mongo on localhost:26000
+    // > mongod --port 26000
+    // then run shell
+    // > mongo --port 26000
+    // insert docs
+    // > db.getSiblingDB('test').users.insert({})
+
     const cursor = query({
         uri: 'mongodb://localhost:26000',
         db: 'test',
