@@ -96,10 +96,10 @@ const mongo = module.exports = {
 
         compose({ op, o }) {
             const ins = {
-                'i': 'piano',
-                'd': 'rock_organ',
+                'i': 'music_box',
+                'd': 'glockenspiel',
                 'u': 'koto',
-                'c': 'bird_tweet'
+                'c': 'timpani'
             }
 
             const notes = mongo.compose(o)
